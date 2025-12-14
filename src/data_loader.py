@@ -51,9 +51,7 @@ class TransactionLoader:
 
         # Clean & select
         df2 = df[[member_col, date_col, item_col]].dropna()
-        df2[item_col] = df2[item_col].astype(str).str.strip()
-        # (Optional) normalize spacing/case; comment out if you need original casing:
-        # df2[item_col] = df2[item_col].str.lower()
+        df2[item_col] = df2[item_col].str.lower()
 
         # Group by (member, date) so items bought together form one basket
         grouped = df2.groupby([member_col, date_col])[item_col].apply(list)
