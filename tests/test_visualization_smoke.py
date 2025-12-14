@@ -1,6 +1,6 @@
 import os
 from src.analytics import build_counts_cache, top_copurchases_for_item, top_bundles, cooccurrence_matrix
-from functions.visualization import (
+from src.visualization import (
     plot_top_copurchases_bar, plot_top_bundles_bar, plot_cooccurrence_heatmap, plot_cooccurrence_network
 )
 

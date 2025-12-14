@@ -11,8 +11,6 @@ import pandas as pd
 
 from src.analytics import CountsCache
 
-# If seaborn isn't desired, you can remove it and use matplotlib pcolor/imshow.
-
 def plot_top_copurchases_bar(
     item: str,
     top_pairs: List[Tuple[str, int]],
