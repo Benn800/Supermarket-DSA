@@ -18,9 +18,25 @@ This project analyzes customer purchasing patterns using:
 - [5] Plot: Top bundles (bar chart)
 - [6] Plot: Co‑occurrence heatmap
 - [7] Plot: Co‑occurrence network (thresholded)
+- [8] Save counts to SQLite (LO3)
+- [9] Load top pairs from SQLite
 - [0] Exit
 
-**Note**: Enter items in lower case only
+**Note** 
+1. Enter items in lower case only
+2. Explanation for CLI Menu option 3
+    - Prompts for two items (Item A and Item B) with case-sensitive matching and warnings if items aren't found
+    - Asks for thresholds:
+      - Minimum count (default 5): how many transactions must contain both items
+      - Minimum support (default 0.01): the fraction of all transactions containing the pair
+    - Displays basic metrics:
+      - Count(A,B): absolute number of times both appear together
+      - Support(A,B): percentage of transactions with both items
+      - Often?: YES/NO answer—whether the pair meets your thresholds  
+    - Optional detailed view: If user wants more depth, shows:
+      - Confidence A→B: likelihood of B given A was purchased
+      - Confidence B→A: likelihood of A given B was purchased
+      - Lift: how much more likely they're bought together vs. independently  
 
 ## Project Structure
 
