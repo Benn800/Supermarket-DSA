@@ -2,7 +2,7 @@ from src.analytics import (
     build_counts_cache,
     top_copurchases_for_item,
     top_bundles,
-    # pair_stats,
+    pair_stats,
     # cooccurrence_matrix,
 )
 

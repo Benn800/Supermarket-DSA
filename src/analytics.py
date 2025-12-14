@@ -95,3 +95,45 @@ def top_bundles(
             entries.append((tuple(sorted(t)), c))
     entries.sort(key=lambda x: (-x[1], x[0]))
     return entries[:top_n]
+
+def pair_stats(
+    a: str,
+    b: str,
+    cache: CountsCache,
+    min_count: int = 5,
+    min_support: float = 0.01
+) -> Dict[str, float | int | bool]:
+    """
+    Quick check whether two items are often co-purchased.
+    Returns:
+      - count_ab       (#transactions containing both)
+      - support_ab     (count_ab / n_transactions)
+      - support_a, support_b
+      - confidence_a_to_b = count_ab / count_a
+      - confidence_b_to_a = count_ab / count_b
+      - lift = support_ab / (support_a * support_b)  [>1 suggests positive association]
+      - often          
+    """
+    n = cache.n_tx
+    count_ab = int(cache.pair_counts.get(frozenset((a, b)), 0))
+    support_ab = (count_ab / n) if n > 0 else 0.0
+
+    count_a = int(cache.item_support.get(a, 0))
+    count_b = int(cache.item_support.get(b, 0))
+    support_a = (count_a / n) if n > 0 else 0.0
+    support_b = (count_b / n) if n > 0 else 0.0
+
+    confidence_a_to_b = (count_ab / count_a) if count_a > 0 else 0.0
+    confidence_b_to_a = (count_ab / count_b) if count_b > 0 else 0.0
+    lift = (support_ab / (support_a * support_b)) if (support_a > 0 and support_b > 0) else 0.0
+
+    return {
+        "count_ab": count_ab,
+        "support_ab": support_ab,
+        "support_a": support_a,
+        "support_b": support_b,
+        "confidence_a_to_b": confidence_a_to_b,
+        "confidence_b_to_a": confidence_b_to_a,
+        "lift": lift,
+        "often": (count_ab >= min_count) and (support_ab >= min_support),
+    }
