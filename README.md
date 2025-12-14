@@ -23,19 +23,19 @@ This project analyzes customer purchasing patterns using:
 ## Project Structure
 
 task_2/\
-├─ README.md\
-├─ requirements.txt\
-├─ .gitignore\
-├─ src/\       
-│     ├─ __init__.py\
-│     ├─ data_loader.py\
-│     ├─ analytics.py          # co-occurrence cache + query functions\
-│     ├─ visualization.py      # plotting helpers (bar charts, heatmap, graph)\
-│     ├─ cli.py                # menu using the analytics functions\
-│     └─ main.py\
-└─ tests/\
-   ├─ test_analytics.py\
-   └─ test_visualization_smoke.py
+    ├─ README.md\
+    ├─ requirements.txt\
+    ├─ .gitignore\
+    ├─ src/\
+    │    ├─ __init__.py\
+    │    ├─ data_loader.py\
+    │    ├─ analytics.py          # co-occurrence cache + query functions\
+    │    ├─ visualization.py      # plotting helpers (bar charts, heatmap, graph)\
+    │    ├─ cli.py                # menu using the analytics functions\
+    │    └─ main.py\
+    └─ tests/\
+          ├─ test_analytics.py\
+          └─ test_visualization_smoke.py
 
 ## Setup
 

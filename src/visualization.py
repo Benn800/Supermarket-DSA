@@ -11,8 +11,6 @@ import pandas as pd
 
 from src.analytics import CountsCache
 
-# If seaborn isn't desired, you can remove it and use matplotlib pcolor/imshow.
-
 def plot_top_copurchases_bar(
     item: str,
     top_pairs: List[Tuple[str, int]],
@@ -59,8 +57,8 @@ def plot_cooccurrence_heatmap(
     plt.figure(figsize=(10, 8))
     plt.imshow(df.values, cmap="Blues")
     plt.colorbar()
-    plt.xticks(range(len(df.columns)), df.columns, rotation=90)
-    plt.yticks(range(len(df.index)), df.index)
+    plt.xticks(range(len(df.columns)), list(df.columns), rotation=90)
+    plt.yticks(range(len(df.index)), list(df.index))
     plt.title(title)
     plt.tight_layout()
     Path("output").mkdir(exist_ok=True)
