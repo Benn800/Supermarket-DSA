@@ -19,7 +19,7 @@ from .visualization import (
 
 MENU = """
 [1] Top co‑purchases for an item
-[2] Top 3 most common bundles (pairs & trios)
+[2] Top K most common bundles (pairs & trios) 
 [3] Check if two items are often co‑purchased
 [4] Plot: Top co‑purchases (bar chart)
 [5] Plot: Top bundles (bar chart)
@@ -53,7 +53,10 @@ def run_cli(csv_path: str) -> None:
                     print(f"{item} — {other}: {c}")
 
         elif choice == "2":
-            top = top_bundles(cache=cache, top_n=3, include_trios=True)
+            k = int(input("Top K bundles (default 3): ") or "3")
+            include_trios_str = input("Include trios? (y/N): ").strip().lower()
+            include_trios = include_trios_str == "y"
+            top = top_bundles(cache=cache, top_n=k, include_trios=include_trios)
             if not top:
                 print("No bundles found.")
             else:
