@@ -20,6 +20,8 @@ This project analyzes customer purchasing patterns using:
 - [7] Plot: Co‑occurrence network (thresholded)
 - [0] Exit
 
+**Note**: Enter items in lower case only
+
 ## Project Structure
 
 task_2/\
@@ -48,4 +50,9 @@ source .venv/bin/activate
 
 pip install -r requirements.txt
 pytest -q
+```
+## To run
+
+```bash
+python -m src.main Supermarket_dataset_PAI.csv
 ```

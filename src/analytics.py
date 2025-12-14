@@ -96,6 +96,34 @@ def top_bundles(
     entries.sort(key=lambda x: (-x[1], x[0]))
     return entries[:top_n]
 
+def pair_check_simple(
+    a: str,
+    b: str,
+    cache: CountsCache,
+    min_count: int = 5,
+    min_support: float = 0.01
+) -> dict:
+    """
+    Simplified pair check: returns only the essentials to decide YES/NO quickly.
+
+    Returns:
+      {
+        "count": int,
+        "support": float,
+        "n": int,            # total transactions
+        "often": bool        # (count >= min_count) and (support >= min_support)
+      }
+    """
+    n = cache.n_tx
+    count = int(cache.pair_counts.get(frozenset((a, b)), 0))
+    support = (count / n) if n > 0 else 0.0
+    return {
+        "count": count,
+        "support": support,
+        "n": n,
+        "often": (count >= min_count) and (support >= min_support),
+    }
+
 def pair_stats(
     a: str,
     b: str,
@@ -183,3 +211,5 @@ def cooccurrence_matrix(
     for i in items_sorted:
         df.at[i, i] = int(cache.item_support.get(i, 0))
     return df
+
+
