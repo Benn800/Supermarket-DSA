@@ -17,6 +17,34 @@ from .visualization import (
     plot_cooccurrence_network,
 )
 
+def _ask_nonempty(prompt: str) -> str:
+    """Keep asking until user enters a non-empty, non-whitespace value."""
+    while True:
+        val = input(prompt).strip()
+        if val:
+            return val
+        print("Please enter a non-empty value.")
+
+def _maybe_get_existing_item(prompt: str, cache) -> str:
+    """
+    Ask for an item and warn if it doesn't appear in the dataset.
+    Returns the raw input (we don't auto-correct to preserve user's intent).
+    """
+    while True:
+        item = input(prompt).strip()
+        if not item:
+            print("Please enter a non-empty item name.")
+            continue
+        if item not in cache.item_support:
+            print(f'Warning: "{item}" does not appear in the dataset (case-sensitive).')
+            confirm = input("Continue anyway? (y/N): ").strip().lower()
+            if confirm == "y":
+                return item
+            else:
+                # loop again to let the user re-enter
+                continue
+        return item
+
 MENU = """
 [1] Top co‑purchases for an item
 [2] Top K most common bundles (pairs & trios) 
@@ -63,19 +91,55 @@ def run_cli(csv_path: str) -> None:
                 for items, cnt in top:
                     print(f"{' + '.join(items)} | count={cnt}")
 
+
         elif choice == "3":
-            a = input("Item A: ").strip()
-            b = input("Item B: ").strip()
-            min_count = int(input("Min count (default 5): ") or "5")
-            min_support = float(input("Min support (default 0.01): ") or "0.01")
+            # Ask for item names with validation and existence warnings
+            a = _maybe_get_existing_item("Item A: ", cache)
+            b = _maybe_get_existing_item("Item B: ", cache)
+
+            # Ask for thresholds; default if blank; validate numeric input
+            def _ask_int(prompt, default):
+                raw = input(prompt).strip()
+                if not raw:
+                    return default
+                try:
+                    return int(raw)
+                except ValueError:
+                    print("Please enter a valid integer.")
+                    return _ask_int(prompt, default)
+
+            def _ask_float(prompt, default):
+                raw = input(prompt).strip()
+                if not raw:
+                    return default
+                try:
+                    return float(raw)
+                except ValueError:
+                    print("Please enter a valid number (float).")
+                    return _ask_float(prompt, default)
+
+            min_count = _ask_int("Min count (default 5): ", 5)
+            min_support = _ask_float("Min support (default 0.01): ", 0.01)
+
             metrics = pair_stats(a, b, cache=cache, min_count=min_count, min_support=min_support)
+
+            # Optional: classify association by lift for human readability
+            lift = metrics["lift"]
+            if lift > 1.05:
+                assoc = "POSITIVE"
+            elif lift < 0.95:
+                assoc = "NEGATIVE"
+            else:
+                assoc = "NEUTRAL"
+
             print(f"Count({a},{b}) = {metrics['count_ab']}")
             print(f"Support({a},{b}) = {metrics['support_ab']:.4f}  (n={cache.n_tx})")
             print(f"Support({a}) = {metrics['support_a']:.4f} | Support({b}) = {metrics['support_b']:.4f}")
             print(f"Confidence {a}->{b} = {metrics['confidence_a_to_b']:.4f}")
             print(f"Confidence {b}->{a} = {metrics['confidence_b_to_a']:.4f}")
-            print(f"Lift = {metrics['lift']:.4f}")
+            print(f"Lift = {lift:.4f}  ({assoc})")
             print("Often?", "YES" if metrics["often"] else "NO")
+
 
         elif choice == "4":
             item = input("Item name: ").strip()
