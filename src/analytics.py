@@ -137,3 +137,49 @@ def pair_stats(
         "lift": lift,
         "often": (count_ab >= min_count) and (support_ab >= min_support),
     }
+
+def recommend_from_items(
+    items: Iterable[str],
+    cache: CountsCache,
+    top_k: int = 5,
+    exclude_seen: bool = True
+) -> List[Tuple[str, int]]:
+    """
+    Simple neighbor aggregation: sum pair counts for each item in `items`.
+    """
+    items = list(set(items))
+    scores: Counter[str] = Counter()
+    for it in items:
+        for p, c in cache.pair_counts.items():
+            if it in p:
+                other = next(iter(p - {it}))
+                if exclude_seen and other in items:
+                    continue
+                scores[other] += c
+    return sorted(scores.items(), key=lambda x: (-x[1], x[0]))[:top_k]
+
+def cooccurrence_matrix(
+    cache: CountsCache,
+    items_subset: Optional[List[str]] = None
+) -> pd.DataFrame:
+    """
+    Build a symmetric co-occurrence matrix (counts) for a subset or for all items.
+    """
+    # choose items
+    if items_subset is None:
+        items = list(cache.item_support.keys())
+    else:
+        items = list(items_subset)
+    items_sorted = sorted(items)
+    # init DataFrame
+    df = pd.DataFrame(0, index=items_sorted, columns=items_sorted, dtype=int)
+    # fill pairs
+    for p, c in cache.pair_counts.items():
+        a, b = tuple(p)
+        if a in df.index and b in df.columns:
+            df.at[a, b] = c
+            df.at[b, a] = c
+    # diagonal can show single-item support (optional)
+    for i in items_sorted:
+        df.at[i, i] = int(cache.item_support.get(i, 0))
+    return df
