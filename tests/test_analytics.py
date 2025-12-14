@@ -31,4 +31,11 @@ def test_top_bundles_pairs_and_trios():
     labels = [tuple(sorted(b)) for b, _ in bundles]
     assert ('bread','milk') in labels or ('bread','butter') in labels    
 
+def test_pair_stats_often_true_and_false():
+    cache = build_counts_cache(sample_tx(), max_k=2)
+    m = pair_stats('bread','milk', cache=cache, min_count=2, min_support=0.2)
+    assert m['count_ab'] == 2 and m['often'] is True
+    m2 = pair_stats('eggs','jam', cache=cache, min_count=1, min_support=0.01)
+    assert m2['count_ab'] == 0 and m2['often'] is False    
+
 
