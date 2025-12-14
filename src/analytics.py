@@ -77,3 +77,21 @@ def top_copurchases_for_item(
             neighbors.append((other, c))
     neighbors.sort(key=lambda x: (-x[1], x[0]))
     return neighbors[:top_k]
+
+def top_bundles(
+    cache: CountsCache,
+    top_n: int = 3,
+    include_trios: bool = True
+) -> List[Tuple[Tuple[str, ...], int]]:
+    """
+    Return the top-N bundles (pairs and optionally trios), sorted by count desc.
+    Each bundle is returned as (items_tuple_sorted, count).
+    """
+    entries: List[Tuple[Tuple[str, ...], int]] = []
+    for p, c in cache.pair_counts.items():
+        entries.append((tuple(sorted(p)), c))
+    if include_trios:
+        for t, c in cache.trio_counts.items():
+            entries.append((tuple(sorted(t)), c))
+    entries.sort(key=lambda x: (-x[1], x[0]))
+    return entries[:top_n]
