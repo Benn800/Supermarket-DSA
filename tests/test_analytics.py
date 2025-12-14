@@ -24,4 +24,11 @@ def test_top_copurchases_for_bread():
     assert top.get('eggs') == 1
     assert top.get('jam') == 1
 
+def test_top_bundles_pairs_and_trios():
+    cache = build_counts_cache(sample_tx(), max_k=3)
+    bundles = top_bundles(cache=cache, top_n=5, include_trios=True)
+    # Should contain leading pair bundles (bread+milk, bread+butter) and possibly a trio
+    labels = [tuple(sorted(b)) for b, _ in bundles]
+    assert ('bread','milk') in labels or ('bread','butter') in labels    
+
 
