@@ -3,7 +3,7 @@ from src.analytics import (
     top_copurchases_for_item,
     top_bundles,
     pair_stats,
-    # cooccurrence_matrix,
+    cooccurrence_matrix,
 )
 
 def sample_tx():
@@ -37,5 +37,13 @@ def test_pair_stats_often_true_and_false():
     assert m['count_ab'] == 2 and m['often'] is True
     m2 = pair_stats('eggs','jam', cache=cache, min_count=1, min_support=0.01)
     assert m2['count_ab'] == 0 and m2['often'] is False    
+
+def test_cooccurrence_matrix_shape_and_diagonal():
+    cache = build_counts_cache(sample_tx(), max_k=2)
+    df = cooccurrence_matrix(cache)  # all items
+    # diagonal equals item support
+    for i in df.index:
+        assert df.at[i, i] == cache.item_support[i]
+
 
 
