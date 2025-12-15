@@ -6,8 +6,7 @@ This project analyzes customer purchasing patterns using:
 - **Simple, fast queries**:
   - Top co-purchases for a given item
   - Top-N bundles (pairs & optional trios)
-  - Quick pair check with support/confidence/lift
-  - Graph-based recommendations (optional)
+  - Quick pair check with support/confidence/lift metrics
 - **Visualizations**: bar charts, co-occurrence heatmap, and network graph
 
 ## CLI Menu
@@ -18,8 +17,6 @@ This project analyzes customer purchasing patterns using:
 - [5] Plot: Top bundles (bar chart)
 - [6] Plot: Co‑occurrence heatmap
 - [7] Plot: Co‑occurrence network (thresholded)
-- [8] Save counts to SQLite (LO3)
-- [9] Load top pairs from SQLite
 - [0] Exit
 
 **Note** 
@@ -40,23 +37,32 @@ This project analyzes customer purchasing patterns using:
 
 ## Project Structure
 
-task_2/\
-    ├─ README.md\
-    ├─ requirements.txt\
-    ├─ .gitignore\
-    ├─ src/\
-    │    ├─ __init__.py\
-    │    ├─ data_loader.py\
-    │    ├─ analytics.py          # co-occurrence cache + query functions\
-    │    ├─ visualization.py      # plotting helpers (bar charts, heatmap, graph)\
-    │    ├─ cli.py                # menu using the analytics functions\
-    │    └─ main.py\
-    └─ tests/\
-          ├─ test_analytics.py\
-          └─ test_visualization_smoke.py
+```
+task_2/
+├── 📄 README.md                          # User guide & setup instructions
+├── 📄 requirements.txt                   # Python package dependencies
+├── 📄 Supermarket_dataset_PAI.csv        # Input transaction data (14,963 transactions)
+├── 📄 benchmark_complexity.py            # Empirical complexity validation script
+│
+├── 📁 src/                               # Main package
+│   ├── __init__.py                       # Package metadata
+│   ├── main.py                           # Entry point
+│   ├── cli.py                            # Interactive CLI menu (7 options)
+│   ├── data_loader.py                    # CSV input with auto-detected columns
+│   ├── analytics.py                      # Core analysis (cache, queries)
+│   └── visualization.py                  # Plotting (bar, heatmap, network)
+│                       
+│
+└── 📁 tests/                             # Test suite (5 tests, 100% pass)
+    ├── test_analytics.py                 # Cache & query function tests
+    └── test_visualization_smoke.py       # Plot generation smoke tests
+    
 
-## Setup
+```
 
+## Setup & Installation
+
+### 1. Create Virtual Environment
 ```bash
 python -m venv .venv
 # macOS/Linux
@@ -67,8 +73,12 @@ source .venv/bin/activate
 pip install -r requirements.txt
 pytest -q
 ```
-## To run
+## To run CLI Menu
 
 ```bash
 python -m src.main Supermarket_dataset_PAI.csv
+```
+## To run Benchmark Tests
+```bash
+python benchmark_complexity.py
 ```

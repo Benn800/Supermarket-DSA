@@ -6,10 +6,8 @@ from __future__ import annotations
 from typing import List, Tuple, Optional, Iterable
 from pathlib import Path
 import matplotlib.pyplot as plt
-import matplotlib
 import matplotlib.colors
 import matplotlib.cm
-import math
 import networkx as nx
 import pandas as pd
 
@@ -20,6 +18,16 @@ def plot_top_copurchases_bar(
     top_pairs: List[Tuple[str, int]],
     output_path: str = "output/top_copurchases_bar.png"
 ) -> str:
+    """
+    Bar chart of top co-purchased items with a given item.
+    
+    Purpose: Quick visual summary of item affinity
+    - X-axis: co-purchased items
+    - Y-axis: co-purchase count (frequency)
+    - Simple bar chart, easy to interpret
+    
+    Returns path to saved PNG image
+    """
     labels = [x for x, _ in top_pairs]
     counts = [c for _, c in top_pairs]
     plt.figure(figsize=(10, 6))
@@ -58,6 +66,20 @@ def plot_cooccurrence_heatmap(
     title: str = "Co-occurrence matrix",
     output_path: str = "output/cooccurrence_heatmap.png"
 ) -> str:
+    """
+    Heatmap of co-occurrence matrix (item pairs).
+    
+    Purpose: Reveal co-purchase patterns across all items at once
+    - Rows & columns = items (sorted)
+    - Color intensity = co-purchase count
+    - Diagonal = item support (popularity)
+    - Symmetric matrix (mirror across diagonal)
+    
+    Insight: Dark spots show strong associations (bundles), blank areas show unrelated items
+    Warning: Only use for small subsets (<100 items) to avoid overcrowding
+    
+    Returns path to saved PNG image
+    """
     plt.figure(figsize=(10, 8))
     plt.imshow(df.values, cmap="Blues")
     plt.colorbar()
@@ -162,7 +184,8 @@ def plot_cooccurrence_network(
     # Clip extreme lifts to keep color scale stable
     lift_low, lift_high = (1.0, max(1.0 + 0.001, min(max(lifts), 2.0)))  # upper bound at ~2
     norm = matplotlib.colors.Normalize(vmin=lift_low, vmax=lift_high)
-    cmap = matplotlib.cm.get_cmap("coolwarm")
+    
+    cmap = matplotlib.colormaps.get_cmap("coolwarm")
     edge_colors = [cmap(norm(l)) for l in lifts]
 
     # 6) Layout & draw

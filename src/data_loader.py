@@ -33,6 +33,15 @@ class TransactionLoader:
         ]
 
     def load_transactions(self) -> List[List[str]]:
+        """
+        Load CSV and return list of baskets (each basket = list of items).
+        
+        Process:
+        1. Read CSV and auto-detect member/date/item columns (case-insensitive)
+        2. Group rows by (member, date) so all items in one shopping trip form one basket
+        3. Deduplicate items within each basket (preserve order, use set for O(1) lookup)
+        4. Return clean list of baskets ready for analysis
+        """
         df = pd.read_csv(self.csv_path)
 
         # Build a case-insensitive lookup {lower_name -> actual_name}

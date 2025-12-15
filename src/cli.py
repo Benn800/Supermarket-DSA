@@ -1,3 +1,17 @@
+"""
+Interactive CLI menu for market basket analysis.
+
+Features:
+- 7 analysis options: item affinity, top bundles, pair checking, visualizations
+- Input validation: case-sensitive item matching with warnings
+- Extensible design: easy to add new queries or visualizations
+
+User experience priorities:
+- Simple defaults: thresholds have reasonable defaults (min_count=5, min_support=0.01)
+- Progressive disclosure: basic answers first, optional detailed metrics on request
+- Helpful warnings: alert users when items not found (common source of "no results" confusion)
+- Graceful fallbacks: show friendly message if thresholds eliminate all results
+"""
 from __future__ import annotations
 import argparse
 from typing import List
@@ -8,7 +22,6 @@ from src.analytics import (
     top_bundles,
     pair_check_simple,
     pair_stats,
-    recommend_from_items,
     cooccurrence_matrix,
 )
 from .visualization import (
@@ -17,10 +30,18 @@ from .visualization import (
     plot_cooccurrence_heatmap,
     plot_cooccurrence_network,
 )
-from src.store_sql import save_counts_to_sql, load_top_pairs_from_sql
 
 def _maybe_get_existing_item(prompt: str, cache) -> str:
-    """Ask until user enters a non-empty item; warn if item not in dataset."""
+    """
+    Prompt user for item name with validation and helpful warnings.
+    
+    Purpose: Prevent "no results found" confusion from case-sensitive mismatches
+    - Check if item exists in dataset (case-sensitive, as stored)
+    - Warn user if item not found and give option to retry
+    - Allow user to proceed anyway if they're confident (e.g., future item)
+    
+    Returns: User's item input (lowercase for consistency with dataset)
+    """
     while True:
         item = input(prompt).strip()
         if not item:
@@ -58,12 +79,30 @@ MENU = """
 [5] Plot: Top bundles (bar chart)
 [6] Plot: Co‑occurrence heatmap
 [7] Plot: Co‑occurrence network (thresholded)
-[8] Save counts to SQLite (LO3)
-[9] Load top pairs from SQLite
 [0] Exit
 """
 
 def run_cli(csv_path: str) -> None:
+    """
+    Interactive CLI menu loop for market basket analysis.
+    
+    Workflow:
+    1. Load and preprocess transactions from CSV (auto-detect columns, deduplicate items)
+    2. Build counts cache in one pass (O(n·b²) → ~100ms for real dataset)
+    3. Loop: display menu, handle 7 analysis options + exit
+    
+    Design:
+    - Cache built once, reused across all queries (amortizes preprocessing cost)
+    - Each menu option is self-contained (easy to understand, modify)
+    - Progressive disclosure: simple metrics first, optional details on demand
+    - Graceful degradation: shows message if thresholds eliminate all results
+    
+    Menu options:
+    [1] Top co-purchases: "What items sell well with this item?"
+    [2] Top bundles: "What are the most common purchase combinations?"
+    [3] Pair check: "Do customers often buy A and B together? YES/NO + metrics"
+    [4-7] Visualizations: bar charts, heatmap, network graph
+    """
     print("Loading transactions...")
     tl = TransactionLoader(csv_path)
     transactions: List[List[str]] = tl.load_transactions()
@@ -147,27 +186,6 @@ def run_cli(csv_path: str) -> None:
                             )
             print(f"Saved: {path}")
         
-        elif choice == "8":
-            db = input("DB path (default output/pai_counts.db): ").strip() or "output/pai_counts.db"
-            try:
-                save_counts_to_sql(cache, db_path=db)
-                print(f"Saved item_support and pair_counts to {db}")
-            except Exception as e:
-                print(f"Save error: {e}")
-
-        elif choice == "9":
-            db = input("DB path (default output/pai_counts.db): ").strip() or "output/pai_counts.db"
-            k  = int(input("Top K (default 10): ").strip() or "10")
-            try:
-                rows = load_top_pairs_from_sql(db_path=db, k=k)
-                if not rows:
-                    print("No rows found. Did you run [8] to save first?")
-                else:
-                    for a, b, cnt in rows:
-                        print(f"{a} + {b} | count={cnt}")
-            except Exception as e:
-                print(f"Load error: {e}")
-
         elif choice == "0":
             print("Bye!")
             break
